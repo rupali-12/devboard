@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { registerUser, loginUser, AuthError } from '../services/auth.service';
 import { registerSchema, loginSchema } from '../utils/validators/auth.validator';
 import { validate } from '../middleware/validate';
-import { setTokenCookie, clearTokenCookie } from '../utils/jwt';
+import { setTokenCookie, clearTokenCookie, generateToken } from '../utils/jwt';
 import { authenticate, AuthRequest } from '../middleware/authenticate';
 import { User } from '../models/User';
 
@@ -56,5 +56,16 @@ router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
     },
   });
 });
+
+// GET /auth/socket-token — returns a short-lived token for Socket.io auth
+// This is needed because httpOnly cookies can't be read by JS
+// but Socket.io handshake needs a token
+router.get('/socket-token', authenticate, (req: AuthRequest, res: Response) => {
+  const token = generateToken({
+    userId: req.user!.userId,
+    email: req.user!.email,
+  })
+  res.json({ token })
+})
 
 export default router;
