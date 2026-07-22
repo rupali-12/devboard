@@ -9,18 +9,28 @@ export interface AuthRequest extends Request {
 }
 
 export function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
+  console.log("Cookies:", req.cookies);
+  console.log("Cookie header:", req.headers.cookie);
+
   const token = req.cookies?.jwt;
 
   if (!token) {
-    return res.status(401).json({ error: 'Not authenticated. Please log in.' });
+    return res.status(401).json({
+      error: "Not authenticated",
+      cookies: req.cookies,
+      header: req.headers.cookie,
+    });
   }
 
   try {
     const decoded = verifyToken(token);
     req.user = decoded;
     next();
-  } catch (error) {
-    res.clearCookie('jwt');
-    return res.status(401).json({ error: 'Session expired. Please log in again.' });
+  } catch (err) {
+    console.error(err);
+    res.clearCookie("jwt");
+    return res.status(401).json({
+      error: "Invalid token",
+    });
   }
 }
