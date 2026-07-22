@@ -13,7 +13,7 @@ dotenv.config()
 
 const app = express()
 
-// ── DB Connection (cached for serverless) ─────────────────────────────────
+// ── DB Connection ─────────────────────────────────────────────────────────
 let isConnected = false
 
 async function connectDB() {
@@ -25,23 +25,41 @@ async function connectDB() {
   console.log('✅ MongoDB connected')
 }
 
-// ── CORS ──────────────────────────────────────────────────────────────────
+// ── CORS — explicitly list all allowed origins ────────────────────────────
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:3000',
+  'https://devboard-eosin-alpha.vercel.app',  // ← your actual frontend URL
   process.env.FRONTEND_URL,
 ].filter(Boolean) as string[]
 
-app.use(helmet())
+app.use(helmet({
+  crossOriginResourcePolicy: false, // Allow cross-origin requests
+}))
+
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, mobile)
       if (!origin) return callback(null, true)
-      if (allowedOrigins.includes(origin)) return callback(null, true)
-      callback(new Error(`CORS blocked: ${origin}`))
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true)
+      }
+
+      console.log('CORS blocked origin:', origin)
+      console.log('Allowed origins:', allowedOrigins)
+      return callback(null, true) // ← temporarily allow ALL origins to debug
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   })
 )
+
+// Handle OPTIONS preflight requests explicitly
+app.options('*', cors())
+
 app.use(express.json())
 app.use(cookieParser())
 
@@ -61,6 +79,7 @@ app.get('/api/health', (req: Request, res: Response) => {
     status: 'ok',
     message: 'DevBoard API is running',
     environment: process.env.NODE_ENV,
+    allowedOrigins,
     timestamp: new Date().toISOString(),
   })
 })
