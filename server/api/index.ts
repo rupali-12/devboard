@@ -3,9 +3,7 @@ import dotenv from 'dotenv'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import helmet from 'helmet'
-
 import { connectDB } from '../src/config/database'
-
 import authRoutes from '../src/routes/auth.routes'
 import boardRoutes from '../src/routes/board.routes'
 import columnRoutes from '../src/routes/column.routes'
@@ -15,29 +13,22 @@ dotenv.config()
 
 const app = express()
 
-const allowedOrigins = [
-  'http://localhost:5173',
-    'http://localhost:3000',
-  'https://devboard-eosin-alpha.vercel.app', 
-  process.env.FRONTEND_URL,
-].filter(Boolean) as string[]
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',
+    'https://devboard-eosin-alpha.vercel.app',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean) as string[],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
+}
 
-app.use(helmet())
+app.use(helmet({ crossOriginResourcePolicy: false }))
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true)
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true)
-      }
-
-      callback(new Error(`CORS blocked: ${origin}`))
-    },
-    credentials: true,
-  })
-)
+// Handle OPTIONS preflight FIRST before any other middleware
+app.options('*', cors(corsOptions))
+app.use(cors(corsOptions))
 
 app.use(express.json())
 app.use(cookieParser())
@@ -48,10 +39,7 @@ app.use(async (_req, res, next) => {
     await connectDB()
     next()
   } catch (err) {
-    console.error(err)
-    res.status(500).json({
-      error: 'Database connection failed',
-    })
+    res.status(500).json({ error: 'Database connection failed' })
   }
 })
 
