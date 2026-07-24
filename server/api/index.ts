@@ -1,8 +1,6 @@
 import express, { Request, Response } from 'express'
 import dotenv from 'dotenv'
-import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import helmet from 'helmet'
 import { connectDB } from '../src/config/database'
 import authRoutes from '../src/routes/auth.routes'
 import boardRoutes from '../src/routes/board.routes'
@@ -13,22 +11,34 @@ dotenv.config()
 
 const app = express()
 
-const corsOptions = {
-  origin: [
+// Manual CORS — handle it ourselves, no library
+app.use((req, res, next) => {
+  const origin = req.headers.origin
+  const allowedOrigins = [
     'http://localhost:5173',
     'https://devboard-eosin-alpha.vercel.app',
     process.env.FRONTEND_URL,
-  ].filter(Boolean) as string[],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
-}
+  ].filter(Boolean) as string[]
 
-app.use(helmet({ crossOriginResourcePolicy: false }))
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+  } else if (!origin) {
+    // Postman, server-to-server — allow
+    res.setHeader('Access-Control-Allow-Origin', '*')
+  }
 
-// Handle OPTIONS preflight FIRST before any other middleware
-app.options('*', cors(corsOptions))
-app.use(cors(corsOptions))
+  res.setHeader('Access-Control-Allow-Credentials', 'true')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,Cookie,X-Requested-With')
+
+  // Handle preflight immediately
+  if (req.method === 'OPTIONS') {
+    res.status(200).end()
+    return
+  }
+
+  next()
+})
 
 app.use(express.json())
 app.use(cookieParser())

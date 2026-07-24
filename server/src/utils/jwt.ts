@@ -21,20 +21,20 @@ export function verifyToken(token: string): TokenPayload {
 }
 
 export function setTokenCookie(res: Response, token: string): void {
-  const isProduction = process.env.NODE_ENV === 'production'
+  const isProd = process.env.NODE_ENV === 'production'
   res.cookie('jwt', token, {
     httpOnly: true,
-    secure: isProduction,           // HTTPS only in production
-    sameSite: isProduction ? 'none' : 'lax',  // 'none' needed for cross-domain
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   })
 }
 
 export function clearTokenCookie(res: Response): void {
-  const isProduction = process.env.NODE_ENV === 'production'
+  const isProd = process.env.NODE_ENV === 'production'
   res.clearCookie('jwt', {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
   })
 }

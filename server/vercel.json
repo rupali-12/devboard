@@ -1,9 +1,21 @@
 {
   "version": 2,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/(.*)",
-      "destination": "/api/index"
+      "src": "api/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.ts",
+      "headers": {
+        "Access-Control-Allow-Origin": "https://devboard-eosin-alpha.vercel.app",
+        "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type,Authorization,Cookie,X-Requested-With",
+        "Access-Control-Allow-Credentials": "true"
+      }
     }
   ]
 }
