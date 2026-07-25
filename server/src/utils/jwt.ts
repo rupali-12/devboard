@@ -36,21 +36,25 @@ export function verifyToken(token: string): TokenPayload {
 
 export function setTokenCookie(res: Response, token: string): void {
   const isProduction = process.env.NODE_ENV === 'production';
+  const domain = process.env.COOKIE_DOMAIN;
 
   res.cookie('jwt', token, {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
+    ...(domain ? { domain } : {}),
   });
 }
 
 export function clearTokenCookie(res: Response): void {
   const isProduction = process.env.NODE_ENV === 'production';
+  const domain = process.env.COOKIE_DOMAIN;
 
   res.clearCookie('jwt', {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
+    ...(domain ? { domain } : {}),
   });
 }

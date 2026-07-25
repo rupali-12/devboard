@@ -9,6 +9,19 @@ const api = axios.create({
   },
 })
 
+api.interceptors.request.use((config) => {
+  const token = document.cookie
+    .split('; ')
+    .find((row) => row.startsWith('jwt='))
+    ?.split('=')[1]
+
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${decodeURIComponent(token)}`
+  }
+
+  return config
+})
+
 // NO redirect here — let the router guard handle navigation.
 // Just reject the error so the calling code can handle it.
 api.interceptors.response.use(
