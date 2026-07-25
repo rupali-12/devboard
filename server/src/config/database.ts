@@ -20,6 +20,11 @@ export async function connectDB(): Promise<void> {
     });
   } catch (error) {
     console.error('❌  Failed to connect to MongoDB:', error);
-    process.exit(1); // Exit the app — no point running without a database
+
+    if (process.env.VERCEL !== '1') {
+      process.exit(1);
+    }
+
+    throw error;
   }
 }

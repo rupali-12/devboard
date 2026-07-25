@@ -6,6 +6,12 @@ export function useSocket(boardId: string) {
   const socketStore = useSocketStore()
 
   onMounted(async () => {
+    const socketUrl = (import.meta as any).env.VITE_SOCKET_URL as string | undefined
+    if (!socketUrl) {
+      console.info('Socket.io disabled in current environment; using REST-only mode')
+      return
+    }
+
     try {
       // Get a socket-specific token from our API
       // This works because the JWT cookie is sent automatically by axios

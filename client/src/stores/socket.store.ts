@@ -20,7 +20,13 @@ export const useSocketStore = defineStore('socket', () => {
   function connect(token: string) {
     if (socket.value?.connected) return
 
-    socket.value = io((import.meta as any).env.VITE_SOCKET_URL as string, {
+    const socketUrl = (import.meta as any).env.VITE_SOCKET_URL as string | undefined
+    if (!socketUrl) {
+      console.info('Socket.io disabled; skipping realtime connection')
+      return
+    }
+
+    socket.value = io(socketUrl, {
       auth: { token }, // JWT sent in handshake for auth middleware
       withCredentials: true,
       transports: ['websocket', 'polling'], // Try WebSocket first, fall back to polling
