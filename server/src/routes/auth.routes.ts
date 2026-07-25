@@ -12,7 +12,7 @@ router.post('/register', validate(registerSchema), async (req: Request, res: Res
   try {
     const { user, token } = await registerUser(req.body);
     setTokenCookie(res, token);
-    res.status(201).json({ user });
+    res.status(201).json({ user, token });
   } catch (error) {
     if (error instanceof AuthError) {
       return res.status(error.statusCode).json({ error: error.message });
@@ -26,7 +26,7 @@ router.post('/login', validate(loginSchema), async (req: Request, res: Response)
   try {
     const { user, token } = await loginUser(req.body);
     setTokenCookie(res, token);
-    res.status(200).json({ user });
+    res.status(200).json({ user, token });
   } catch (error) {
     if (error instanceof AuthError) {
       return res.status(error.statusCode).json({ error: error.message });

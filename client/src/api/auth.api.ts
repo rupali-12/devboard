@@ -15,10 +15,10 @@ export interface LoginPayload {
 
 export const authApi = {
   register: (data: RegisterPayload) =>
-    api.post<{ user: User }>('/auth/register', data),
+    api.post<{ user: User; token: string }>('/auth/register', data),
 
   login: (data: LoginPayload) =>
-    api.post<{ user: User }>('/auth/login', data),
+    api.post<{ user: User; token: string }>('/auth/login', data),
 
   logout: () =>
     api.post('/auth/logout'),
