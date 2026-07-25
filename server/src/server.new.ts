@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express'
+import express, { NextFunction, Request, Response } from 'express'
 import http from 'http'
 import { Server } from 'socket.io'
 import dotenv from 'dotenv'
@@ -21,6 +21,18 @@ dotenv.config()
 
 const app = express()
 const isVercel = Boolean(process.env.VERCEL)
+let dbReadyPromise: Promise<void> | null = null
+
+function ensureDbReady(): Promise<void> {
+  if (!dbReadyPromise) {
+    dbReadyPromise = connectDB().catch((error) => {
+      console.error('Database connection failed', error)
+      throw error
+    })
+  }
+
+  return dbReadyPromise
+}
 const PORT = process.env.PORT || 5000
 const allowedOrigins = [
   process.env.FRONTEND_URL,
@@ -60,6 +72,19 @@ app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())
 
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  if (req.path === '/health') {
+    return next()
+  }
+
+  try {
+    await ensureDbReady()
+    next()
+  } catch (error) {
+    next(error)
+  }
+})
+
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({
     status: 'ok',
@@ -78,7 +103,7 @@ if (!isVercel) {
 }
 
 async function startServer() {
-  await connectDB()
+  await ensureDbReady()
 
   if (isVercel) {
     console.log('Vercel deployment detected; skipping long-lived server startup')
@@ -91,6 +116,11 @@ async function startServer() {
     console.log(`🔌 Socket.io ready`)
   })
 }
+
+app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
+  console.error('Unhandled API error', err)
+  res.status(500).json({ error: 'Internal server error' })
+})
 
 if (require.main === module) {
   startServer()
