@@ -9,7 +9,12 @@ export interface AuthRequest extends Request {
 }
 
 export function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
-  const token = req.cookies?.jwt;
+  const cookieToken = req.cookies?.jwt;
+  const authHeader = req.headers.authorization;
+  const headerToken = authHeader?.startsWith('Bearer ')
+    ? authHeader.slice(7)
+    : undefined;
+  const token = cookieToken || headerToken;
 
   if (!token) {
     return res.status(401).json({ error: 'Not authenticated. Please log in.' });
