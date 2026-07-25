@@ -86,6 +86,11 @@
 import { computed } from 'vue'
 import { onMounted, onUnmounted } from 'vue'
 
+const emit = defineEmits<{
+  confirm: []
+  cancel: []
+}>()
+
 const props = withDefaults(
   defineProps<{
     show: boolean
@@ -101,12 +106,6 @@ const props = withDefaults(
     type: 'danger',
   }
 )
-
-defineEmits<{
-  confirm: []
-  cancel: []
-}>()
-
 
 // Close on Escape key
 function handleKeydown(e: KeyboardEvent) {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { io, Socket } from 'socket.io-client'
+import { io } from 'socket.io-client'
 import { useTaskStore } from './task.store'
 import { useColumnStore } from './column.store'
 
@@ -11,7 +11,7 @@ interface OnlineUser {
 }
 
 export const useSocketStore = defineStore('socket', () => {
-  const socket = ref<Socket | null>(null)
+  const socket = ref<any>(null)
   const isConnected = ref(false)
   const onlineUsers = ref<OnlineUser[]>([])
 

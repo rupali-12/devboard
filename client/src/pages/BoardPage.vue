@@ -209,7 +209,7 @@ import { useSocket } from "@/composables/useSocket";
 import ColumnItem from "@/components/board/ColumnItem.vue";
 import AddColumnForm from "@/components/board/AddColumnForm.vue";
 import TaskDetailModal from "@/components/modals/TaskDetailModal.vue";
-import { Task } from "@/types";
+import type { Task } from "@/types";
 import ArchivedDrawer from "@/components/board/ArchivedDrawer.vue";
 import { useConfirm } from "@/composables/useConfirm";
 import { taskApi } from "@/api/task.api";

@@ -6,6 +6,15 @@ interface TokenPayload {
   email: string;
 }
 
+function getExpiresIn(): jwt.SignOptions['expiresIn'] {
+  const configured = process.env.JWT_EXPIRES_IN;
+  if (configured && /^\d+[smhd]$/i.test(configured)) {
+    return configured as jwt.SignOptions['expiresIn'];
+  }
+
+  return '7d';
+}
+
 export function generateToken(payload: TokenPayload): string {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
@@ -13,7 +22,7 @@ export function generateToken(payload: TokenPayload): string {
   }
 
   return jwt.sign(payload, secret, {
-    expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as jwt.SignOptions['expiresIn'],
+    expiresIn: getExpiresIn(),
   });
 }
 

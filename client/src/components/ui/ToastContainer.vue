@@ -51,11 +51,11 @@ import { useToastStore } from '@/stores/toast.store'
 
 const toastStore = useToastStore()
 
-const toastClasses = {
+const toastClasses: Record<'success' | 'error' | 'warning' | 'info', string> = {
   success: 'bg-green-600 text-white',
-  error:   'bg-red-600 text-white',
+  error: 'bg-red-600 text-white',
   warning: 'bg-orange-500 text-white',
-  info:    'bg-blue-600 text-white',
+  info: 'bg-blue-600 text-white',
 }
 </script>
 

@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { Board } from '@/src/types';
+import type { Board } from '@/types';
 
 defineProps<{ board: Board }>()
 </script>
